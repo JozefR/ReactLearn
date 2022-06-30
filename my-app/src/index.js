@@ -1,6 +1,6 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
 
 function Square(props) {
   return (
@@ -10,40 +10,44 @@ function Square(props) {
   );
 }
 
-// i can have state in square component and board 
+// i can have state in square component and board
 // can ask square for the state. This is however not good approach
 // better is when we save the state in parent component and pass it down to child's.
 
 /*
-To collect data from multiple children, or to have two child components communicate with each other,
+To collect data from multiple childrens, or to have two child components communicate with each other,
 you need to declare the shared state in their parent component instead. 
 The parent component can pass the state back down to the children by using props; 
 this keeps the child components in sync with each other and with the parent component.
 */
 
 class Board extends React.Component {
-  constructor(props){
-    super(props)
+  constructor(props) {
+    super(props);
     this.state = {
       squares: Array(9).fill(null),
+      xIsNext: true,
     };
   }
 
   handleClick(i) {
     const squares = this.state.squares.slice();
-    squares[i] = 'X';
-    this.setState({squares: squares});
+    const xIsNext = !this.state.xIsNext;
+    squares[i] = this.state.xIsNext === true ? "X" : "O";
+    this.setState({ squares: squares, xIsNext: xIsNext });
   }
 
   renderSquare(i) {
-    return <Square 
-        value={this.state.squares[i]} 
+    return (
+      <Square
+        value={this.state.squares[i]}
         onClick={() => this.handleClick(i)}
-      />;
+      />
+    );
   }
 
   render() {
-    const status = 'Next player: X';
+    const status = this.state.xIsNext ? "Next player: X" : "Next player: O";
 
     return (
       <div>
