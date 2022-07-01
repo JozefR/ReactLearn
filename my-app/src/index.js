@@ -11,7 +11,11 @@ function Square(props) {
 }
 
 function SquareHistory(props) {
-  return <button className="square">{props.value}</button>;
+  return (
+    <button className="square" onClick={props.onClick}>
+      {props.value}
+    </button>
+  );
 }
 
 function HistoryOption(props) {
@@ -49,39 +53,47 @@ function ChossedOptions(props) {
 }
 
 function HistoryRow(props) {
-  const historyOptions = props.squares.slice();
+  const squares = props.squares.slice();
+  const historySquares = props.historySquares.slice();
 
+  let rowIndex = -1;
   if (props.row === 1) {
-    return historyOptions.map((element, index) => {
+    return squares.map((element, index) => {
       if (index < 3) {
+        rowIndex++;
         return (
           <RenderSquareHistory
-            squares={historyOptions}
-            index={index}
+            squares={historySquares[4].squares.slice(0, 3)}
+            index={rowIndex}
+            onClick={() => this.handleHistoryClick()}
           ></RenderSquareHistory>
         );
       }
     });
   }
   if (props.row === 2) {
-    return historyOptions.map((element, index) => {
+    rowIndex = -1;
+    return squares.map((element, index) => {
       if (index > 2 && index < 6) {
+        rowIndex++;
         return (
           <RenderSquareHistory
-            squares={historyOptions}
-            index={index}
+            squares={historySquares[4].squares.slice(3, 6)}
+            index={rowIndex}
           ></RenderSquareHistory>
         );
       }
     });
   }
   if (props.row === 3) {
-    return historyOptions.map((element, index) => {
+    rowIndex = -1;
+    return squares.map((element, index) => {
       if (index > 5) {
+        rowIndex++;
         return (
           <RenderSquareHistory
-            squares={historyOptions}
-            index={index}
+            squares={historySquares[4].squares.slice(6, 9)}
+            index={rowIndex}
           ></RenderSquareHistory>
         );
       }
@@ -89,12 +101,14 @@ function HistoryRow(props) {
   }
 }
 
-function RenderSquare(props) {
-  return <Square value={props.squares[props.index]} />;
-}
-
 function RenderSquareHistory(props) {
-  return <SquareHistory value={props.squares[props.index]} />;
+  const value = props.squares[props.index];
+
+  if (value !== null) {
+    return <SquareHistory value={value} />;
+  } else {
+    return <SquareHistory value="" />;
+  }
 }
 
 class Board extends React.Component {
@@ -137,6 +151,18 @@ class Board extends React.Component {
     });
   }
 
+  handleHistoryClick() {}
+
+  renderHistorySquare(squares, historySquares, row) {
+    return (
+      <HistoryRow
+        squares={squares}
+        historySquares={historySquares}
+        row={row}
+      ></HistoryRow>
+    );
+  }
+
   renderSquare(i) {
     return (
       <Square
@@ -158,13 +184,25 @@ class Board extends React.Component {
         <div>
           <div className="status">{status}</div>
           <div className="board-row">
-            <HistoryRow squares={this.state.squares} row={1}></HistoryRow>
+            {this.renderHistorySquare(
+              this.state.squares,
+              this.state.squaresHistory,
+              1
+            )}
           </div>
           <div className="board-row">
-            <HistoryRow squares={this.state.squares} row={2}></HistoryRow>
+            {this.renderHistorySquare(
+              this.state.squares,
+              this.state.squaresHistory,
+              2
+            )}
           </div>
           <div className="board-row">
-            <HistoryRow squares={this.state.squares} row={3}></HistoryRow>
+            {this.renderHistorySquare(
+              this.state.squares,
+              this.state.squaresHistory,
+              3
+            )}
           </div>
           <div className="choosed-options">
             <ChossedOptions
