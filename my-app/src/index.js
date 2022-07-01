@@ -10,22 +10,45 @@ function Square(props) {
   );
 }
 
-// i can have state in square component and board
-// can ask square for the state. This is however not good approach
-// better is when we save the state in parent component and pass it down to child's.
+function HistoryOption(props) {
+  let buttonText = "";
 
-/*
-To collect data from multiple childrens, or to have two child components communicate with each other,
-you need to declare the shared state in their parent component instead. 
-The parent component can pass the state back down to the children by using props; 
-this keeps the child components in sync with each other and with the parent component.
-*/
+  if (props.index === 0) {
+    buttonText += "Go to game start";
+  } else {
+    buttonText += "Go to move #" + props.index;
+  }
+
+  return (
+    <div>
+      <p>
+        {props.index + 1 + ". "}{" "}
+        <button className="history-button">{buttonText}</button>
+      </p>
+    </div>
+  );
+}
+
+function ChossedOptions(props) {
+  const historyOptions = props.squaresHistory.slice();
+
+  let index = -1;
+  var historyElement = historyOptions.map((element) => {
+    if (element != null) {
+      index++;
+      return <HistoryOption index={index}></HistoryOption>;
+    }
+  });
+
+  return historyElement;
+}
 
 class Board extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       squares: Array(9).fill(null),
+      squaresHistory: [],
       xIsNext: true,
       winner: null,
     };
@@ -37,11 +60,25 @@ class Board extends React.Component {
     }
 
     const squares = this.state.squares.slice();
+    const squaresHistory = this.state.squaresHistory.slice();
     const xIsNext = !this.state.xIsNext;
-    squares[i] = this.state.xIsNext === true ? "X" : "O";
+    const player = this.state.xIsNext === true ? "X" : "O";
+
+    const history = {
+      player: player,
+    };
+
+    squares[i] = player;
+    squaresHistory.push(history);
+
     const winner = calculateWinner(squares);
 
-    this.setState({ squares: squares, xIsNext: xIsNext, winner: winner });
+    this.setState({
+      squares: squares,
+      squaresHistory: squaresHistory,
+      xIsNext: xIsNext,
+      winner: winner,
+    });
   }
 
   renderSquare(i) {
@@ -77,6 +114,11 @@ class Board extends React.Component {
           {this.renderSquare(6)}
           {this.renderSquare(7)}
           {this.renderSquare(8)}
+        </div>
+        <div className="choosed-options">
+          <ChossedOptions
+            squaresHistory={this.state.squaresHistory}
+          ></ChossedOptions>
         </div>
       </div>
     );
