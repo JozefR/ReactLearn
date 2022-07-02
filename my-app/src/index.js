@@ -40,6 +40,7 @@ class Game extends React.Component {
       squaresHistory: squaresHistory,
       xIsNext: xIsNext,
       winner: winner,
+      showHistoryStep: squaresHistory.length - 1,
     });
   }
 
@@ -161,10 +162,6 @@ function Board(props) {
   if (props.winner != null) {
     const squares = props.squares.slice();
     const historySquares = props.squaresHistory.slice();
-    const historyStep =
-      props.showHistoryStep != null
-        ? props.showHistoryStep
-        : props.squaresHistory.length - 1;
 
     return (
       <div>
@@ -173,7 +170,7 @@ function Board(props) {
             if (index < 3) {
               return (
                 <RenderSquareHistory
-                  squares={historySquares[historyStep]}
+                  squares={historySquares[props.showHistoryStep]}
                   index={index}
                   onClick={props.onHistoryClick}
                 ></RenderSquareHistory>
@@ -186,7 +183,7 @@ function Board(props) {
             if (index > 2 && index < 6) {
               return (
                 <RenderSquareHistory
-                  squares={historySquares[historyStep]}
+                  squares={historySquares[props.showHistoryStep]}
                   index={index}
                   onClick={props.onHistoryClick}
                 ></RenderSquareHistory>
@@ -199,7 +196,7 @@ function Board(props) {
             if (index > 5) {
               return (
                 <RenderSquareHistory
-                  squares={historySquares[historyStep]}
+                  squares={historySquares[props.showHistoryStep]}
                   index={index}
                   onClick={props.onHistoryClick}
                 ></RenderSquareHistory>
