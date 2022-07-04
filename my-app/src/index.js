@@ -2,7 +2,41 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 
-function Board() {
+function Board({ squares, status, onSquareClick, onRestartClick }) {
+  function renderSquare(i) {
+    return (
+      <button className="square" onClick={() => onSquareClick(i)}>
+        {squares[i]}
+      </button>
+    );
+  }
+
+  return (
+    <div>
+      <div className="status">STATUS{status}</div>
+      <div className="board-row">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
+      </div>
+      <div className="board-row">
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
+      </div>
+      <div className="board-row">
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
+      <button className="restart" onClick={onRestartClick}>
+        restart
+      </button>
+    </div>
+  );
+}
+
+function Game() {
   const [squares, setSquares] = useLocalStorageState(
     "squares",
     Array(9).fill(null)
@@ -27,44 +61,15 @@ function Board() {
     setSquares(Array(9).fill(null));
   }
 
-  function renderSquare(i) {
-    return (
-      <button className="square" onClick={() => selectSquare(i)}>
-        {squares[i]}
-      </button>
-    );
-  }
-
-  return (
-    <div>
-      <div className="status">STATUS{status}</div>
-      <div className="board-row">
-        {renderSquare(0)}
-        {renderSquare(1)}
-        {renderSquare(2)}
-      </div>
-      <div className="board-row">
-        {renderSquare(3)}
-        {renderSquare(4)}
-        {renderSquare(5)}
-      </div>
-      <div className="board-row">
-        {renderSquare(6)}
-        {renderSquare(7)}
-        {renderSquare(8)}
-      </div>
-      <button className="restart" onClick={restart}>
-        restart
-      </button>
-    </div>
-  );
-}
-
-function Game() {
   return (
     <div className="game">
       <div className="game-board">
-        <Board />
+        <Board
+          squares={squares}
+          status={status}
+          onSquareClick={selectSquare}
+          onRestartClick={restart}
+        />
       </div>
     </div>
   );
