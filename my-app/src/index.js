@@ -2,200 +2,81 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+function Board() {
+  const [squares, setSquares] = React.useState(Array(9).fill(null));
 
-// TIC TAC TOE GAME written using class components
-class Game extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      squares: Array(9).fill(null),
-      squaresHistory: [],
-      showHistoryStep: null,
-      xIsNext: true,
-      winner: null,
-    };
-  }
+  const winner = calculateWinner(squares);
+  const nextValue = calculateNextValue(squares);
+  const status = calculateStatus(winner, squares, nextValue);
 
-  handleClick(i) {
-    if (this.state.winner != null) {
+  function selectSquare(square) {
+    if (winner) {
       return;
     }
 
-    const squares = this.state.squares.slice();
-    const squaresHistory = this.state.squaresHistory.slice();
-    const xIsNext = !this.state.xIsNext;
-    const player = this.state.xIsNext === true ? "X" : "O";
+    const squaresCopy = [...squares];
+    squaresCopy[square] = nextValue;
 
-    squares[i] = player;
-
-    const history = { player, squares };
-
-    squaresHistory.push(history);
-
-    const winner = calculateWinner(squares);
-
-    this.setState({
-      squares,
-      squaresHistory,
-      xIsNext,
-      winner,
-      showHistoryStep: squaresHistory.length - 1,
-    });
+    setSquares(squaresCopy);
   }
 
-  handleHistoryClick(index) {
-    this.setState({ showHistoryStep: index });
+  function restart() {
+    setSquares(Array(9).fill(null));
   }
 
-  render() {
+  function renderSquare(i) {
     return (
-      <div className="game">
-        <div className="game-board">
-          <Board
-            winner={this.state.winner}
-            squares={this.state.squares}
-            squaresHistory={this.state.squaresHistory}
-            showHistoryStep={this.state.showHistoryStep}
-            onClick={(index) => this.handleClick(index)}
-          ></Board>
-        </div>
-        <div className="game-info">
-          <PlayerStatus
-            xIsNext={this.state.xIsNext}
-            winner={this.state.winner}
-          ></PlayerStatus>
-          <div className="choosed-options">
-            <ChossedOptions
-              squaresHistory={this.state.squaresHistory}
-              onClick={(index) => this.handleHistoryClick(index)}
-            ></ChossedOptions>
-          </div>
-        </div>
-      </div>
+      <button className="square" onClick={() => selectSquare(i)}>
+        {squares[i]}
+      </button>
     );
-  }
-}
-
-function PlayerStatus(props) {
-  let playerStatus = props.xIsNext ? "Next player: X" : "Next player: O";
-
-  if (props.winner != null) {
-    playerStatus = "The winner is: " + props.winner + " !!!";
-  }
-
-  return <div className="status">{playerStatus}</div>;
-}
-
-function ChossedOptions(props) {
-  const historyOptions = props.squaresHistory.slice();
-
-  let index = -1;
-  var historyElements = historyOptions.map((element) => {
-    if (element != null) {
-      index++;
-      return (
-        <HistoryOption
-          index={index}
-          onClick={(index) => props.onClick(index)}
-        ></HistoryOption>
-      );
-    }
-    return "";
-  });
-
-  return historyElements;
-}
-
-function HistoryOption(props) {
-  let buttonText = "";
-
-  if (props.index === 0) {
-    buttonText = "Go to game start";
-  } else {
-    buttonText = "Go to move #" + props.index + ".";
   }
 
   return (
     <div>
-      <p>
-        {props.index + 1 + ". "}{" "}
-        <button
-          className="history-button"
-          onClick={(index) => props.onClick(props.index)}
-        >
-          {buttonText}
-        </button>
-      </p>
+      <div className="status">STATUS{status}</div>
+      <div className="board-row">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
+      </div>
+      <div className="board-row">
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
+      </div>
+      <div className="board-row">
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
+      <button className="restart" onClick={restart}>
+        restart
+      </button>
     </div>
   );
 }
 
-function Square(props) {
+function Game() {
   return (
-    <button className="square" onClick={props.onClick}>
-      {props.value}
-    </button>
+    <div className="game">
+      <div className="game-board">
+        <Board />
+      </div>
+    </div>
   );
 }
 
-function Board(props) {
-  if (props.winner != null) {
-    return (
-      <div>
-        <div className="board-row">{renderSquareHistory(0)}</div>
-        <div className="board-row">{renderSquareHistory(3)}</div>
-        <div className="board-row">{renderSquareHistory(6)}</div>
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <div className="board-row">
-          {renderSquare(0)}
-          {renderSquare(1)}
-          {renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {renderSquare(3)}
-          {renderSquare(4)}
-          {renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {renderSquare(6)}
-          {renderSquare(7)}
-          {renderSquare(8)}
-        </div>
-      </div>
-    );
-  }
+function calculateStatus(winner, squares, nextValue) {
+  return winner
+    ? `Winner: ${winner}`
+    : squares.every(Boolean)
+    ? `Scratch: Cat's game`
+    : `Next player: ${nextValue}`;
+}
 
-  function renderSquare(rowIndex) {
-    return (
-      <Square
-        value={props.squares[rowIndex]}
-        onClick={(index) => props.onClick(rowIndex)}
-      />
-    );
-  }
-
-  function renderSquareHistory(startRow) {
-    const squares = props.squares.slice();
-    const historySquares = props.squaresHistory.slice();
-
-    return squares.slice(startRow, startRow + 3).map((element, index) => {
-      if (index !== 0) {
-        startRow++;
-      }
-
-      return (
-        <Square
-          value={historySquares[props.showHistoryStep].squares[startRow] || ""}
-          onClick={props.onHistoryClick}
-        ></Square>
-      );
-    });
-  }
+function calculateNextValue(squares) {
+  return squares.filter(Boolean).length % 2 === 0 ? "X" : "O";
 }
 
 function calculateWinner(squares) {
@@ -218,56 +99,5 @@ function calculateWinner(squares) {
   return null;
 }
 
-//root.render(<Game />);
-
-// ============================================================================
-
-// COLOCATION Slow
-function sleep(time) {
-  const done = Date.now() + time;
-  while (done > Date.now()) {
-    // sleep...
-  }
-}
-
-// imagine that this slow component is actually slow because it's rendering a
-// lot of data (for example).
-function SlowComponent({ time, onChange }) {
-  sleep(time);
-  return (
-    <div>
-      Wow, that was{" "}
-      <input
-        value={time}
-        type="number"
-        onChange={(e) => onChange(Number(e.target.value))}
-      />
-      ms slow
-    </div>
-  );
-}
-
-function DogName({ time, dog, onChange }) {
-  return (
-    <div>
-      <label htmlFor="dog">Dog Name</label>
-      <br />
-      <input id="dog" value={dog} onChange={(e) => onChange(e.target.value)} />
-      <p>{dog ? `${dog}'s favorite number is ${time}.` : "enter a dog name"}</p>
-    </div>
-  );
-}
-
-function Colocation() {
-  // this is "global state"
-  const [dog, setDog] = React.useState("");
-  const [time, setTime] = React.useState(200);
-  return (
-    <div>
-      <DogName time={time} dog={dog} onChange={setDog} />
-      <SlowComponent time={time} onChange={setTime} />
-    </div>
-  );
-}
-
-root.render(<Colocation />);
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<Game />);
