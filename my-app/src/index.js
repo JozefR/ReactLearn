@@ -3,7 +3,10 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 
 function Board() {
-  const [squares, setSquares] = React.useState(Array(9).fill(null));
+  const [squares, setSquares] = useLocalStorageState(
+    "squares",
+    Array(9).fill(null)
+  );
 
   const winner = calculateWinner(squares);
   const nextValue = calculateNextValue(squares);
@@ -65,6 +68,29 @@ function Game() {
       </div>
     </div>
   );
+}
+
+function useLocalStorageState(key, defaultValue = "") {
+  const [state, setState] = React.useState(() =>
+    initialValue(key, defaultValue)
+  );
+
+  React.useEffect(() => {
+    var serialized = JSON.stringify(state);
+    window.localStorage.setItem(key, serialized);
+  }, [key, state]);
+
+  return [state, setState];
+}
+
+function initialValue(key, defaultValue) {
+  var item = window.localStorage.getItem(key);
+
+  if (item !== null) {
+    return JSON.parse(item);
+  }
+
+  return defaultValue;
 }
 
 function calculateStatus(winner, squares, nextValue) {
