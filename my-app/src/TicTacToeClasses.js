@@ -1,8 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom/client";
 import "./index.css";
-
-const root = ReactDOM.createRoot(document.getElementById("root"));
 
 // TIC TAC TOE GAME written using class components
 class Game extends React.Component {
@@ -218,4 +215,4 @@ function calculateWinner(squares) {
   return null;
 }
 
-root.render(<Game />);
+export default Game;

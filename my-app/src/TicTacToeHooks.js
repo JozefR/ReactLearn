@@ -1,14 +1,14 @@
 import React from "react";
-import ReactDOM from "react-dom/client";
 import "./index.css";
 
 function Game() {
-  const [squares, setSquares] = useLocalStorageState(
-    "squares",
-    Array(9).fill(null)
+  const [historySquares, setHistorySquares] = useLocalStorageState(
+    "historySquares",
+    [Array(9).fill(null)]
   );
-  const [historySquares, setHistorySquares] = React.useState([]);
-  const [historyMove, setHistoryMove] = React.useState(null);
+  const [move, setMove] = useLocalStorageState("move", 0);
+
+  const squares = historySquares[move];
 
   const winner = calculateWinner(squares);
   const nextValue = calculateNextValue(squares);
@@ -19,27 +19,23 @@ function Game() {
       return;
     }
 
-    const squaresCopy = [...squares];
+    const squaresCopy = [...historySquares[move]];
     squaresCopy[square] = nextValue;
 
-    const history = { player: nextValue, squares: squaresCopy };
     const historySquaresCopy = [...historySquares];
-    historySquaresCopy.push(history);
+    historySquaresCopy.push(squaresCopy);
 
-    setSquares(squaresCopy);
     setHistorySquares(historySquaresCopy);
+    setMove(move + 1);
   }
 
   function moveToHistory(index) {
-    if (winner == null) {
-      return null;
-    }
-
-    setHistoryMove(index);
+    setMove(index);
   }
 
   function restart() {
-    setSquares(Array(9).fill(null));
+    setHistorySquares([Array(9).fill(null)]);
+    setMove(0);
   }
 
   return (
@@ -47,11 +43,10 @@ function Game() {
       <div className="game-board">
         <Board
           squares={squares}
-          historySquares={historySquares}
           status={status}
           onSquareClick={selectSquare}
           onRestartClick={restart}
-          historyMove={historyMove}
+          historyMove={move}
         />
         <HistoryMoves
           historySquares={historySquares}
@@ -85,7 +80,6 @@ function HistoryMoves({ historySquares, onHistoryMoveClick }) {
 
 function Board({
   squares,
-  historySquares,
   status,
   historyMove,
   onSquareClick,
@@ -95,53 +89,29 @@ function Board({
     return <Square value={squares[i]} onClick={() => onSquareClick(i)} />;
   }
 
-  function renderSquareHistory(startRow) {
-    return squares.slice(startRow, startRow + 3).map((element, index) => {
-      if (index !== 0) {
-        startRow++;
-      }
-
-      return (
-        <Square
-          value={historySquares[historyMove].squares[startRow] || ""}
-        ></Square>
-      );
-    });
-  }
-
-  if (historyMove != null) {
-    return (
-      <div>
-        <div className="board-row">{renderSquareHistory(0)}</div>
-        <div className="board-row">{renderSquareHistory(3)}</div>
-        <div className="board-row">{renderSquareHistory(6)}</div>
+  return (
+    <div>
+      <div className="status">STATUS{status}</div>
+      <div className="board-row">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
       </div>
-    );
-  } else {
-    return (
-      <div>
-        <div className="status">STATUS{status}</div>
-        <div className="board-row">
-          {renderSquare(0)}
-          {renderSquare(1)}
-          {renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {renderSquare(3)}
-          {renderSquare(4)}
-          {renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {renderSquare(6)}
-          {renderSquare(7)}
-          {renderSquare(8)}
-        </div>
-        <button className="restart" onClick={onRestartClick}>
-          restart
-        </button>
+      <div className="board-row">
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
       </div>
-    );
-  }
+      <div className="board-row">
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
+      <button className="restart" onClick={onRestartClick}>
+        restart
+      </button>
+    </div>
+  );
 }
 
 function Square(props) {
@@ -207,5 +177,4 @@ function calculateWinner(squares) {
   return null;
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<Game />);
+export default Game;
