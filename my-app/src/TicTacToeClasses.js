@@ -1,14 +1,12 @@
 import React from "react";
-import "./index.css";
 
 // TIC TAC TOE GAME written using class components
 class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      squares: Array(9).fill(null),
-      squaresHistory: [],
-      showHistoryStep: null,
+      squaresHistory: [Array(9).fill(null)],
+      move: 0,
       xIsNext: true,
       winner: null,
     };
@@ -19,30 +17,27 @@ class Game extends React.Component {
       return;
     }
 
-    const squares = this.state.squares.slice();
-    const squaresHistory = this.state.squaresHistory.slice();
-    const xIsNext = !this.state.xIsNext;
-    const player = this.state.xIsNext === true ? "X" : "O";
+    const squaresHistoryCopy = this.state.squaresHistory.slice();
+    const xIsNextToggled = !this.state.xIsNext;
+    const player = xIsNextToggled === true ? "X" : "O";
+    const squares = squaresHistoryCopy[this.state.move].slice();
 
     squares[i] = player;
 
-    const history = { player, squares };
-
-    squaresHistory.push(history);
+    squaresHistoryCopy.push(squares);
 
     const winner = calculateWinner(squares);
 
     this.setState({
-      squares,
-      squaresHistory,
-      xIsNext,
-      winner,
-      showHistoryStep: squaresHistory.length - 1,
+      squaresHistory: squaresHistoryCopy,
+      move: this.state.move + 1,
+      xIsNext: xIsNextToggled,
+      winner: winner,
     });
   }
 
   handleHistoryClick(index) {
-    this.setState({ showHistoryStep: index });
+    this.setState({ move: index });
   }
 
   render() {
@@ -50,10 +45,7 @@ class Game extends React.Component {
       <div className="game">
         <div className="game-board">
           <Board
-            winner={this.state.winner}
-            squares={this.state.squares}
-            squaresHistory={this.state.squaresHistory}
-            showHistoryStep={this.state.showHistoryStep}
+            squares={this.state.squaresHistory[this.state.move]}
             onClick={(index) => this.handleClick(index)}
           ></Board>
         </div>
@@ -85,20 +77,13 @@ function PlayerStatus(props) {
 }
 
 function ChossedOptions(props) {
-  const historyOptions = props.squaresHistory.slice();
-
-  let index = -1;
-  var historyElements = historyOptions.map((element) => {
-    if (element != null) {
-      index++;
-      return (
-        <HistoryOption
-          index={index}
-          onClick={(index) => props.onClick(index)}
-        ></HistoryOption>
-      );
-    }
-    return "";
+  var historyElements = props.squaresHistory.map((element, index) => {
+    return (
+      <HistoryOption
+        index={index}
+        onClick={(index) => props.onClick(index)}
+      ></HistoryOption>
+    );
   });
 
   return historyElements;
@@ -137,35 +122,25 @@ function Square(props) {
 }
 
 function Board(props) {
-  if (props.winner != null) {
-    return (
-      <div>
-        <div className="board-row">{renderSquareHistory(0)}</div>
-        <div className="board-row">{renderSquareHistory(3)}</div>
-        <div className="board-row">{renderSquareHistory(6)}</div>
+  return (
+    <div>
+      <div className="board-row">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
       </div>
-    );
-  } else {
-    return (
-      <div>
-        <div className="board-row">
-          {renderSquare(0)}
-          {renderSquare(1)}
-          {renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {renderSquare(3)}
-          {renderSquare(4)}
-          {renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {renderSquare(6)}
-          {renderSquare(7)}
-          {renderSquare(8)}
-        </div>
+      <div className="board-row">
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
       </div>
-    );
-  }
+      <div className="board-row">
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
+    </div>
+  );
 
   function renderSquare(rowIndex) {
     return (
@@ -174,24 +149,6 @@ function Board(props) {
         onClick={(index) => props.onClick(rowIndex)}
       />
     );
-  }
-
-  function renderSquareHistory(startRow) {
-    const squares = props.squares.slice();
-    const historySquares = props.squaresHistory.slice();
-
-    return squares.slice(startRow, startRow + 3).map((element, index) => {
-      if (index !== 0) {
-        startRow++;
-      }
-
-      return (
-        <Square
-          value={historySquares[props.showHistoryStep].squares[startRow] || ""}
-          onClick={props.onHistoryClick}
-        ></Square>
-      );
-    });
   }
 }
 
